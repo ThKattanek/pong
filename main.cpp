@@ -11,11 +11,11 @@ void DrawRackets(sf::RenderWindow* window,Color front_color,float pos_pl1, float
 
 // Konfiguration //
 
-//#define BACK_COLOR  0x353535ff
-//#define FRONT_COLOR 0xffffffff
+#define BACK_COLOR  0x353535ff
+#define FRONT_COLOR 0xffffffff
 
-#define BACK_COLOR  0x001300ff
-#define FRONT_COLOR 0x20a020ff
+//#define BACK_COLOR  0x001300ff
+//#define FRONT_COLOR 0x20a020ff
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
