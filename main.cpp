@@ -2,20 +2,22 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Config.hpp>
+#include <math.h>
 
 using namespace std;
 using namespace sf;
 
 void DrawPlayfield(sf::RenderWindow* window, Color back_color, Color front_color);
 void DrawRackets(sf::RenderWindow* window,Color front_color,float pos_pl1, float pos_pl2, float length);
+void DrawBall(sf::RenderWindow* window, Color front_color, float x, float y);
 
 // Konfiguration //
 
-#define BACK_COLOR  0x353535ff
-#define FRONT_COLOR 0xffffffff
+#define BACK_COLOR  sf::Color(0x35,0x35,0x35,0xff)
+#define FRONT_COLOR sf::Color(0xff,0xff,0xff,0xff)
 
-//#define BACK_COLOR  0x001300ff
-//#define FRONT_COLOR 0x20a020ff
+//#define BACK_COLOR  sf::Color(0x00,0x13,0x00,0xff)
+//#define FRONT_COLOR sf::Color(0x20,0xa0,0x20,0xff)
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
@@ -29,7 +31,12 @@ void DrawRackets(sf::RenderWindow* window,Color front_color,float pos_pl1, float
 #define RACKET_SCALE_X 0.013
 #define RACKET_SCALE_Y 0.125
 
+#define BALL_SCALE_X 0.013
+#define BALL_SCALE_Y 0.013
+
 #define RACKET_SPEED 2000
+
+#define BALL_SPEED 1000
 
 int main()
 {
@@ -40,7 +47,9 @@ int main()
 
     sf::Time frame_time;
 
-    cout << "SFML Version: " << SFML_VERSION_MAJOR << "." << SFML_VERSION_MINOR << "." << SFML_VERSION_PATCH << endl;
+    srand(time(NULL));
+
+    cout << "SFML Version: " << SFML_VERSION_MAJOR << "." << SFML_VERSION_MINOR << endl;
     cout << "Das Game Fester wird erstellt" << endl;
     window.create(sf::VideoMode(SCREEN_WIDTH,SCREEN_HEIGHT),"POOOOOONG !!!!", sf::Style::Close /*| sf::Style::Fullscreen*/);
 
@@ -48,7 +57,7 @@ int main()
     float racket_pl2 = SCREEN_HEIGHT / 2;
 
     float racket_length = SCREEN_HEIGHT * RACKET_SCALE_Y;
-    float  racket_speed = RACKET_SPEED * (768.0 / window.getSize().y);
+    float  racket_speed = RACKET_SPEED * ((float)SCREEN_HEIGHT / window.getSize().y);
 
     float racket_pl1_add_pos = 0.0f;
     float racket_pl2_add_pos = 0.0f;
@@ -56,12 +65,54 @@ int main()
     unsigned char racket_keys = 0;
     unsigned char racket_keys_old = 0;
 
-
     float racket_min_y = (window.getSize().y - window.getSize().y * PLAYFIELD_SCALE_Y) / 2;
     float racket_max_y = racket_min_y + window.getSize().y * PLAYFIELD_SCALE_Y;
 
     racket_min_y += racket_length/2;
     racket_max_y -= racket_length/2;
+
+    bool ball_aktive = false;
+    float ball_speed = BALL_SPEED * ((float)SCREEN_WIDTH / window.getSize().x);
+
+    float angle = (rand() + 1.0)/(RAND_MAX + 2)*60 + 240;
+    // Vector aus Winkel errechen auf Eiheitskreis
+    sf::Vector2f ball_vector;
+    ball_vector.x = cos((M_PI/180)*angle);   // Winkel für COS in Bogenmaß umrechnen
+    ball_vector.y = sin((M_PI/180)*angle);   // Winkel für SIN in Bogenmaß umrechnen
+
+    float line_length = SCREEN_WIDTH * PLAYFIELD_SCALE_X;
+    float ball_max_left = ((SCREEN_WIDTH - line_length) / 2);
+    float ball_max_rigth = ball_max_left + line_length;
+    ball_max_left += SCREEN_WIDTH * BALL_SCALE_X;
+    ball_max_rigth -= SCREEN_WIDTH * BALL_SCALE_X;
+
+    float ball_max_top = ((SCREEN_HEIGHT - SCREEN_HEIGHT * PLAYFIELD_SCALE_Y) / 2) + (BALL_SCALE_Y * SCREEN_HEIGHT);
+    float ball_max_bottom = (ball_max_top + SCREEN_HEIGHT * PLAYFIELD_SCALE_Y) - (BALL_SCALE_Y * SCREEN_HEIGHT * 2);
+
+    float ball_x,ball_y;
+
+    int akt_player = 0;
+    int scores_pl1 = 0, scores_pl2 = 0;
+
+    sf::Texture texture;
+    texture.loadFromFile("num.png");
+
+    sf::Sprite score_pl1_out(texture), score_pl2_out(texture);
+
+    score_pl1_out.setScale(sf::Vector2f(11,11));
+    score_pl1_out.setOrigin(Vector2f(0,0));
+    score_pl1_out.setPosition(SCREEN_WIDTH / 2 - 80,10);
+
+    IntRect sc1_rec(0,0,4,5);
+    score_pl1_out.setTextureRect(sc1_rec);
+
+    score_pl2_out.setScale(sf::Vector2f(11,11));
+    score_pl2_out.setOrigin(Vector2f(0,0));
+    score_pl2_out.setPosition(SCREEN_WIDTH / 2 + 30,10);
+
+    IntRect sc2_rec(0,0,4,5);
+    score_pl2_out.setTextureRect(sc2_rec);
+
 
     frame_time = clock.getElapsedTime();
 
@@ -132,6 +183,15 @@ int main()
                     // Player 2 DOWN
                     racket_keys &= ~(1 << 5);
                     break;
+                case sf::Keyboard::Space:
+                    if(scores_pl1 < 9 && scores_pl2 <9)
+                        ball_aktive = true;
+                    break;
+                case sf::Keyboard::R:
+                    ball_aktive = false;
+                    akt_player = 0;
+                    scores_pl1 = 0, scores_pl2 = 0;
+                    break;
 
                 default:
                     break;
@@ -192,12 +252,96 @@ int main()
         if(((racket_pl2 + racket_pl2_add_pos) > racket_min_y) && ((racket_pl2 + racket_pl2_add_pos) < racket_max_y))
             racket_pl2 += racket_pl2_add_pos;
 
+        // BallPhysics //
+        if(ball_aktive)
+        {
+            ball_x = ball_vector.x * frame_time.asMicroseconds() * (1 / ball_speed) + ball_x;
+            ball_y = ball_vector.y * frame_time.asMicroseconds() * (1 / ball_speed) + ball_y;
+
+            if(ball_x < ball_max_left)
+            {
+                if(ball_y < (racket_pl1-racket_length/2 - SCREEN_HEIGHT*BALL_SCALE_Y))
+                {
+                    // Punkt für Player 2
+                    scores_pl2++;
+                    akt_player = 0;
+                    ball_aktive = false;
+                }
+
+                if(ball_y > (racket_pl1+racket_length/2 + SCREEN_HEIGHT*BALL_SCALE_Y))
+                {
+                    // Punkt für Player 2
+                    scores_pl2++;
+                    akt_player = 0;
+                    ball_aktive = false;
+                }
+
+                ball_vector.x *= -1;
+            }
+
+            if(ball_x > ball_max_rigth)
+            {
+                if(ball_y < (racket_pl2-racket_length/2 - SCREEN_HEIGHT*BALL_SCALE_Y))
+                {
+                    // Punkt für Player 1
+                    scores_pl1++;
+                    akt_player = 1;
+                    ball_aktive = false;
+                }
+
+                if(ball_y > (racket_pl2+racket_length/2 + SCREEN_HEIGHT*BALL_SCALE_Y))
+                {
+                    // Punkt für Player 1
+                    scores_pl1++;
+                    akt_player = 1;
+                    ball_aktive = false;
+                }
+
+                ball_vector.x *= -1;
+            }
+
+            if(ball_y <= ball_max_top)
+                ball_vector.y *= -1;
+
+            if(ball_y >= ball_max_bottom)
+                ball_vector.y *= -1;
+        }
+        else
+        {
+            float angle;
+
+            if(akt_player == 0)
+            {
+                angle = (rand() + 1.0)/(RAND_MAX + 2)*60 + 60;
+                ball_x = ball_max_left;
+                ball_y = racket_pl1;
+            }
+            else
+            {
+                angle = (rand() + 1.0)/(RAND_MAX + 2)*60 + 240;
+                ball_x = ball_max_rigth;
+                ball_y = racket_pl2;
+            }
+
+            ball_vector.x = cos((M_PI/180)*angle);   // Winkel für COS in Bogenmaß umrechnen
+            ball_vector.y = sin((M_PI/180)*angle);   // Winkel für SIN in Bogenmaß umrechnen
+        }
+
         // Bildschirmaufbau
-        DrawPlayfield(&window,sf::Color(BACK_COLOR),sf::Color(FRONT_COLOR));
-        DrawRackets(&window,sf::Color(FRONT_COLOR),racket_pl1,racket_pl2,racket_length);
+        DrawPlayfield(&window,BACK_COLOR,FRONT_COLOR);
+        DrawRackets(&window,FRONT_COLOR,racket_pl1,racket_pl2,racket_length);
+        DrawBall(&window,FRONT_COLOR,ball_x,ball_y);
+
+        sc1_rec.left=scores_pl1*4;
+        sc2_rec.left=scores_pl2*4;
+        score_pl1_out.setTextureRect(sc1_rec);
+        score_pl2_out.setTextureRect(sc2_rec);
+        window.draw(score_pl1_out);
+        window.draw(score_pl2_out);
+
         window.display();
 
-        sf::sleep(sf::milliseconds(10));
+        sf::sleep(sf::milliseconds(1));
     }
 
     cout << "Und tschüss .." << endl;
@@ -269,4 +413,20 @@ void DrawRackets(sf::RenderWindow* window, Color front_color, float pos_pl1, flo
 
     racket.setPosition(end_x,pos_pl2);
     window->draw(racket);
+}
+
+void DrawBall(sf::RenderWindow* window,Color front_color, float x, float y)
+{
+    float window_xw = window->getSize().x;
+    float window_yw = window->getSize().y;
+    float width =window_xw * BALL_SCALE_X;
+    float high =window_yw * BALL_SCALE_Y;
+
+    sf::RectangleShape ball;
+    ball.setSize(sf::Vector2f(width,high));
+    ball.setOrigin(width/2,high/2);
+    ball.setFillColor(front_color);
+    ball.setPosition(x,y);
+
+    window->draw(ball);
 }
