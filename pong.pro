@@ -5,7 +5,7 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
-LIBS += -lsfml-system -lsfml-window -lsfml-graphics
+LIBS += -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 
 include(deployment.pri)
 qtcAddDeployment()

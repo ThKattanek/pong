@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <SFML/Config.hpp>
 #include <math.h>
 
@@ -36,7 +37,7 @@ void DrawBall(sf::RenderWindow* window, Color front_color, float x, float y);
 
 #define RACKET_SPEED 2000
 
-#define BALL_SPEED 1000
+#define BALL_SPEED 2000
 
 int main()
 {
@@ -111,8 +112,18 @@ int main()
     score_pl2_out.setPosition(SCREEN_WIDTH / 2 + 30,10);
 
     IntRect sc2_rec(0,0,4,5);
-    score_pl2_out.setTextureRect(sc2_rec);
+    score_pl2_out.setTextureRect(sc2_rec);    
 
+    sf::SoundBuffer buffer1;
+    if (!buffer1.loadFromFile("sound1.ogg"))
+            return -1;
+
+    sf::SoundBuffer buffer2;
+    if (!buffer2.loadFromFile("sound2.ogg"))
+            return -1;
+
+    sf::Sound sound1(buffer1);
+    sf::Sound sound2(buffer2);
 
     frame_time = clock.getElapsedTime();
 
@@ -276,6 +287,11 @@ int main()
                     ball_aktive = false;
                 }
 
+                if(ball_aktive)
+                {
+                    sound1.setPlayingOffset(sf::milliseconds(100));
+                    sound1.play();
+                }
                 ball_vector.x *= -1;
             }
 
@@ -297,14 +313,28 @@ int main()
                     ball_aktive = false;
                 }
 
+                if(ball_aktive)
+                {
+                    sound1.setPlayingOffset(sf::milliseconds(100));
+                    sound1.play();
+                }
+
                 ball_vector.x *= -1;
             }
 
             if(ball_y <= ball_max_top)
+            {
+                sound2.setPlayingOffset(sf::milliseconds(100));
+                sound2.play();
                 ball_vector.y *= -1;
+            }
 
             if(ball_y >= ball_max_bottom)
+            {
+                sound2.setPlayingOffset(sf::milliseconds(100));
+                sound2.play();
                 ball_vector.y *= -1;
+            }
         }
         else
         {
