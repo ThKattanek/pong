@@ -10,11 +10,15 @@ Gegner eine Punkt. Wer zuerst 9 Punkte erreicht, hat gewonnen.
 Tasten:
 
 Spieler 1:
+
 Hoch   - Q
+
 Runter - A
 
 Spieler 2:
+
 Hoch   - CURSOR HOCH
+
 Runter - CURSOR HOCH
 
 Ball Start: Space
