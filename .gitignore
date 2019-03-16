@@ -4,3 +4,4 @@ build/*
 build*
 *.autosave
 install*
+public_release
