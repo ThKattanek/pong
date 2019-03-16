@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Pong
+Comment=A Pong Clone
+Comment[de]=Ein Pong Clone
+Icon=pong
+TryExec=pong
+Exec=pong %f
+MimeType=application/x-geogebra-file;application/x-geogebra-tool;
+Categories=Game;
