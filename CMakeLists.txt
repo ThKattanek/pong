@@ -48,13 +48,12 @@ if(WIN32)
     set(WIN_RC ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}.rc)
 endif()
 
-################### LIBRARIES #####################
+##################### LIBRARY #####################
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # SFML
-# network audio graphics window system
 find_package(SFML 2 COMPONENTS system window graphics audio REQUIRED)
 if(SFML_FOUND)
     include_directories(${SFML_INCLUDE_DIR})
@@ -66,26 +65,38 @@ if(SFML_FOUND)
     set(LIBRARIES ${LIBRARIES} ${SFML_GRAPHICS_DEPENDENCIES})
     set(LIBRARIES ${LIBRARIES} ${SFML_AUDIO_LIBRARY})
     set(LIBRARIES ${LIBRARIES} ${SFML_AUDIO_DEPENDENCIES})
-    if(WIN32)
-        if(WIN32_STATIC_BUILD)
-            #message(STATUS ${WIN32_LIBS})
-            #set(LIBRARIES ${LIBRARIES} -mwindows -lsfml-system-s png jpeg harfbuzz z bz2 winmm)
-            set(LIBRARIES ${LIBRARIES} ${WIN32_LIBS})
-        endif()
-    endif()
 else()
-    message(STATUS "SFML not found!")
+    message(FATAL_ERROR "SFML not found!")
+endif()
+
+# Für Windows
+if(WIN32)
+    if(CMAKE_CROSSCOMPILING)
+        message(STATUS "Windows Crosscompiling ...")
+
+        # SFML
+        execute_process(
+          COMMAND ${PKG_CONFIG_EXECUTABLE} sfml --libs
+          OUTPUT_VARIABLE SFML_LIBS
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        #message(STATUS "SFML Libs: " ${SFML_LIBS})
+
+        set(WIN_LIBRARIES ${WIN_LIBRARIES} ${SFML_LIBS})
+
+    endif()
 endif()
 
 ################### EXECUTABLE ####################
 
 if(NOT WIN32)
-    add_executable(${PROJECT_NAME} ${SOURCES})
+    add_executable(${PROJECT_NAME} ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS} ${QM})
+    target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${WIN_RC})
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${MOC_SRCS} ${RES_SOURCES} ${UI_HEADERS} ${QM} ${WIN_RC})
+    target_link_libraries(${PROJECT_NAME} ${WIN_LIBRARIES})
 endif()
-
-target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 ################### INSTALL #######################
 
