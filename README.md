@@ -9,12 +9,12 @@ Gegner einen Punkt. Wer zuerst 9 Punkte erreicht, hat gewonnen.
 
 Gespielt wird mittels Tastatur.
 
-Spieler 1:
+#### Spieler 1: ####
 
 Hoch   - Q  
 Runter - A
 
-Spieler 2:
+#### Spieler 2: ####
 
 Hoch   - CURSOR HOCH  
 Runter - CURSOR HOCH
