@@ -45,11 +45,18 @@ int main()
     sf::VideoMode vm;
     sf::Event event;
     sf::Clock clock;
-
     sf::Time frame_time;
 
     srand(time(NULL));
 
+    char sound1_file[1024];
+    char sound2_file[1024];
+    char numbers_file[1024];
+    
+    sprintf(sound1_file,"%s/sound1.ogg",DATA_PATH);
+    sprintf(sound2_file,"%s/sound2.ogg",DATA_PATH);
+    sprintf(numbers_file,"%s/num.png",DATA_PATH);
+    
     cout << "SFML Version: " << SFML_VERSION_MAJOR << "." << SFML_VERSION_MINOR << endl;
     cout << "Das Game Fester wird erstellt" << endl;
     window.create(sf::VideoMode(SCREEN_WIDTH,SCREEN_HEIGHT),"POOOOOONG !!!!", sf::Style::Close /*| sf::Style::Fullscreen*/);
@@ -96,7 +103,7 @@ int main()
     int scores_pl1 = 0, scores_pl2 = 0;
 
     sf::Texture texture;
-    texture.loadFromFile("num.png");
+    texture.loadFromFile(numbers_file);
 
     sf::Sprite score_pl1_out(texture), score_pl2_out(texture);
 
@@ -115,11 +122,11 @@ int main()
     score_pl2_out.setTextureRect(sc2_rec);    
 
     sf::SoundBuffer buffer1;
-    if (!buffer1.loadFromFile("sound1.ogg"))
+    if (!buffer1.loadFromFile(sound1_file))
             return -1;
 
     sf::SoundBuffer buffer2;
-    if (!buffer2.loadFromFile("sound2.ogg"))
+    if (!buffer2.loadFromFile(sound2_file))
             return -1;
 
     sf::Sound sound1(buffer1);
