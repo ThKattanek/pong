@@ -128,4 +128,8 @@ else()
     install(FILES "data/sound1.ogg" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/${DATA_DIRECTORY_NAME})
     install(FILES "data/sound2.ogg" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/${DATA_DIRECTORY_NAME})
     install(FILES "LICENSE" DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME})
+    
+    # Install Startmenü Eintrag
+    install(FILES "src/pong.desktop" DESTINATION share/applications)
+    install(FILES "src/pong.png" DESTINATION share/icons/hicolor/64x64/apps)
 endif()

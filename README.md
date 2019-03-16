@@ -42,6 +42,9 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
 make
 make install
 ```
+
+#### ! The install files find under install_mainfest.txt
+
 ## Compiling for Windows x32 with MXE (Crossdev)
 ```bash
 cd ~
@@ -49,7 +52,7 @@ git clone https://github.com/ThKattanek/pong.git
 cd pong
 mkdir build-win-x32
 cd build-win-x32
-[MXE-PATH]/usr/bin/i686-w64-mingw32.static-cmake .. -DSFML_STATIC_LIBRARIES=TRUE
+[MXE-PATH]/usr/bin/i686-w64-mingw32.static-cmake .. -DWIN32_STATIC_BUILD=TRUE
 make
 ```
 ## Compiling for Windows x64 with MXE (Crossdev)
@@ -59,7 +62,7 @@ git clone https://github.com/ThKattanek/pong.git
 cd pong
 mkdir build-win-x64
 cd build-win-x64
-[MXE-PATH]/usr/bin/x86_64-w64-mingw32.static-cmake .. -DSFML_STATIC_LIBRARIES=TRUE
+[MXE-PATH]/usr/bin/x86_64-w64-mingw32.static-cmake .. -DWIN32_STATIC_BUILD=TRUE
 make
 ```
 ## Complete build and create the windows versions (32/64bit) as 7zip with Script (crossbuild_win_releases.sh)
