@@ -43,7 +43,7 @@ make
 make install
 ```
 
-#### ! The install files find under install_mainfest.txt
+#### ! The installed files find under install_mainfest.txt
 
 ## Compiling for Windows x32 with MXE (Crossdev)
 ```bash
